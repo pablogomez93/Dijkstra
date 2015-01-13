@@ -1,5 +1,4 @@
 #include "graph.h"
-#include "iostream"
 
 Graph::Graph(uint n, bool isOrientedGraph, IMPL impl){
 	this->n = n;
@@ -11,8 +10,6 @@ Graph::Graph(uint n, bool isOrientedGraph, IMPL impl){
 	else
 		this->adjList = vector<list<pair<uint,float> > >(n, list<pair<uint,float> >());
 }
-
-Graph::~Graph(){}
 
 bool Graph::isOrientedGraph() const{
 	return this->isOriented;

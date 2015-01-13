@@ -1,5 +1,6 @@
 #include "graph.h"
 #include "vector"
+#include "iostream"
 #include <limits>
 
 typedef unsigned int uint;
@@ -20,27 +21,22 @@ uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
 	return minimum+1;
 }
 
-void dijkstra(Graph& g, uint v){ 
+void dijkstra(Graph& g, uint v){
 	vector<bool> S(g.getN(),false);
 	S[v-1] = true;
 	vector<float> pi(g.getN(),numeric_limits<float>::max());
 	
-	Adjacencies vAdjs = g.adjacentsOf(v);
-	while(vAdjs.thereIsMore()){
-		vAdjs.advance();
+	for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance()){
 		pi[vAdjs.next()-1] = g.getEdgeWeight(v,vAdjs.next());
 	}
 	pi[v-1] = 0;
-
-
+	
 	uint count = 1;
 	while(count < g.getN()){
 		v = getMinimunOfPI(pi, S);
 		S[v-1] = true;
 	
-		Adjacencies vAdjs = g.adjacentsOf(v);
-		while(vAdjs.thereIsMore()){
-			vAdjs.advance();
+		for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance()){
 			int i = vAdjs.next();
 
 			if(pi[i-1] > pi[v-1] + g.getEdgeWeight(v,i))
@@ -49,13 +45,15 @@ void dijkstra(Graph& g, uint v){
 
 		count++;
 	}
-
-	//pi vector has all short paths, from original v to all nodes
+	
+	/*
+	 * pi vector variable has all short paths, from original v to all nodes
+	 */
 };
 
 
 int main(){
-	Graph g(6, true);
+	Graph g(6, true, ADJACENCIES_LIST);
 
 	g.applyEdge(1,2,4);
 	g.applyEdge(1,3,7);

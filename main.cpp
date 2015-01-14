@@ -33,9 +33,9 @@ void dijkstra(Graph& g, uint v){
 	/*
 	 * Setting position of v in pi vector to 0, and replacing the position of each adjacent of v to the weight between it and v.
 	 */
-	for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance()){
+	for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance())
 		pi[vAdjs.next()-1] = g.getEdgeWeight(v,vAdjs.next());
-	}
+
 	pi[v-1] = 0;
 	
 	/*

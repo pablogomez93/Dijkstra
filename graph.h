@@ -11,6 +11,20 @@ using namespace std;
 
 typedef unsigned int uint;
 
+struct Edge{
+	uint from;
+	uint to;
+	float weight;
+
+	Edge(uint f, uint t, float w){
+		this->from = f;
+		this->to = t;
+		this->weight = w;
+	}
+};
+
+
+
 enum IMPL {ADJACENCIES_MATRIX, ADJACENCIES_LIST};
 
 class Graph{
@@ -58,6 +72,11 @@ public:
 	 * Get the cuantity of direfent edges are now inserted in the graph.
 	 */
 	uint getM() const;
+
+	/*
+	 * Return all edges of the graph, in a set.
+	 */
+	vector<Edge>& getEdges();
 
 	/*
 	 * Add a new vertex, with out adjacents.
@@ -115,6 +134,7 @@ private:
 	uint m;
 	bool isOriented;
 	IMPL type;
+	vector<Edge> edges;
 
 };
 

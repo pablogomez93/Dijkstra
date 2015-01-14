@@ -5,6 +5,7 @@ Graph::Graph(uint n, bool isOrientedGraph, IMPL impl){
 	this->m = 0;
 	this->isOriented = isOrientedGraph;
 	this->type = impl;
+	this->edges = vector<Edge>();
 	if(this->type == ADJACENCIES_MATRIX)
 		this->matrix = vector<vector<float> > (n, vector<float>(n, DEFAULT_WEIGHT));
 	else
@@ -21,6 +22,10 @@ uint Graph::getN() const{
 
 uint Graph::getM() const{
 	return this->m;
+}
+
+vector<Edge>& Graph::getEdges(){
+	return this->edges;
 }
 
 float Graph::getEdgeWeight(uint v1, uint v2) const{
@@ -46,8 +51,10 @@ bool Graph::areAdjacent(uint v1, uint v2) const{
 
 void Graph::applyEdge(uint v1, uint v2){
 	if(this->type == ADJACENCIES_MATRIX){
-		if(this->matrix[v1-1][v2-1] == DEFAULT_WEIGHT)
+		if(this->matrix[v1-1][v2-1] == DEFAULT_WEIGHT){
 			this->m++;
+			this->edges.push_back(Edge(v1,v2,1));
+		}
 		
 		this->matrix[v1-1][v2-1] = 1;
 
@@ -60,13 +67,16 @@ void Graph::applyEdge(uint v1, uint v2){
 			adjList[v2-1].push_back(make_pair(v1,1));
 
 		this->m++;
+		this->edges.push_back(Edge(v1,v2,1));
 	}
 }
 
 void Graph::applyEdge(uint v1, uint v2, float weight){
 	if(this->type == ADJACENCIES_MATRIX){
-		if(this->matrix[v1-1][v2-1] == DEFAULT_WEIGHT)
+		if(this->matrix[v1-1][v2-1] == DEFAULT_WEIGHT){
 			this->m++;
+			this->edges.push_back(Edge(v1,v2,weight));
+		}
 		
 		this->matrix[v1-1][v2-1] = weight;
 
@@ -79,6 +89,7 @@ void Graph::applyEdge(uint v1, uint v2, float weight){
 			adjList[v2-1].push_back(make_pair(v1, weight));		
 
 		this->m++;
+		this->edges.push_back(Edge(v1,v2,weight));
 	}
 
 }

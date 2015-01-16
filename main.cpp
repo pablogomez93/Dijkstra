@@ -1,6 +1,5 @@
 #include "graph.h"
 #include "vector"
-#include "iostream"
 #include <limits>
 
 typedef unsigned int uint;

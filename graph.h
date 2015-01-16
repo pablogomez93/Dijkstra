@@ -23,8 +23,6 @@ struct Edge{
 	}
 };
 
-
-
 enum IMPL {ADJACENCIES_MATRIX, ADJACENCIES_LIST};
 
 class Graph{
@@ -74,7 +72,7 @@ public:
 	uint getM() const;
 
 	/*
-	 * Return all edges of the graph, in a set.
+	 * Return all edges of the graph, in a vector.
 	 */
 	vector<Edge>& getEdges();
 

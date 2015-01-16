@@ -1,5 +1,6 @@
 #include "graph.h"
 #include "vector"
+#include "iostream"
 #include <limits>
 
 typedef unsigned int uint;
@@ -69,25 +70,26 @@ void dijkstra(Graph& g, uint v){
 	
 	/*
 	 * Algorithm end.
-	 * pi vector variable has all short paths, from original v to all nodes
+	 * pi vector variable has all shortest paths, from original v to all nodes
 	 */
 };
 
 
 int main(){
-	Graph g(6, true, ADJACENCIES_LIST);
+	//Set base variables of the graph
+	uint nodesCount = 6;
+	bool isOriented = true;
+	IMPL implementation = ADJACENCIES_LIST;
 
-	g.applyEdge(1,2,4);
-	g.applyEdge(1,3,7);
-	g.applyEdge(1,6,3);
-	g.applyEdge(2,3,3);
-	g.applyEdge(2,5,1);
-	g.applyEdge(3,4,1);
-	g.applyEdge(3,5,1);
-	g.applyEdge(5,4,4);
-	g.applyEdge(6,5,3);
+	/*
+	 * HERE: Charge all edges you want, using the graph API.
+	 */
 
-	dijkstra(g,1);
+	//Set the origin node to calculate the shortest paths from it to all of the rest nodes, with Dijkstra.
+	uint originNodeForDijkstra = 1;
+
+	Graph g(nodesCount, isOriented, implementation);
+	dijkstra(g,originNodeForDijkstra);
 
 	return 0;
 }

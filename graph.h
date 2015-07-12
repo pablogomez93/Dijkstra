@@ -11,12 +11,12 @@ using namespace std;
 
 typedef unsigned int uint;
 
-struct Edge{
+struct Edge {
 	uint from;
 	uint to;
 	float weight;
 
-	Edge(uint f, uint t, float w){
+	Edge(uint f, uint t, float w) {
 		this->from = f;
 		this->to = t;
 		this->weight = w;
@@ -25,13 +25,13 @@ struct Edge{
 
 enum IMPL {ADJACENCIES_MATRIX, ADJACENCIES_LIST};
 
-class Graph{
+class Graph {
 
 public:
 	class Iterator;
 
 	/*
-	 * Construct a simple graph, with n nodes. Is necesary to define if the graph is oriented or not and if 
+	 * Construct a simple graph, with n nodes. Is necesary to define if the graph is oriented or not and if
 	 * it is implemented over adjacencies matrix (ADJACENCIES_MATRIX) or adjacencies lists (ADJACENCIES_LIST), enum IMPL indicates this.
 	 * Each makes graph operations more performantes in diferent cases.
 	 * Nodes are represented by numbers between 1 and n inclusive.
@@ -52,15 +52,15 @@ public:
 
 	/*
 	 * In non-oriented graph, returns if nodes v1 and v2, are adjacents, that means if exist an edge between both.
-	 * If graph is oriented, returns if exist an edge from node v1 to node v2. 
+	 * If graph is oriented, returns if exist an edge from node v1 to node v2.
 	 */
 	bool areAdjacent(uint v1, uint v2) const;
-	
+
 	/*
 	 * Return if the graph is oriented or not, true if it is.
 	 */
 	bool isOrientedGraph() const;
-	
+
 	/*
 	 * Get the cuantity of direfent nodes are now in the graph.
 	 */
@@ -83,7 +83,7 @@ public:
 	void addVertex();
 
 	/*
-	 * Return the weight of the edge between nodes v1 and v2. If the graph is non-oriented, the orden of the parameters 
+	 * Return the weight of the edge between nodes v1 and v2. If the graph is non-oriented, the orden of the parameters
 	 * doesn't matter, but it's important in a oriented graph, v1 indicates the origin of the edge, and v2 indicates the end.
 	 */
 	float getEdgeWeight(uint v1, uint v2) const;
@@ -93,19 +93,19 @@ public:
 	 */
 	const Iterator adjacentsOf(uint v) const;
 
-	class Iterator{
-			
-		public:	
+	class Iterator {
+
+		public:
 			Iterator(const vector<float>& conections, uint n, IMPL type);
 			Iterator(const list<pair<uint,float> >& adjacents, uint n, IMPL type);
-			
+
 			/*
 			 * Get actual adjacent of the iterator. This not modify the iterator status.
 			 */
 			int next() const;
 
 			/*
-			 * Indicates if exist an adjacent node for review 
+			 * Indicates if exist an adjacent node for review
 			 */
 			bool thereIsMore() const;
 
@@ -113,7 +113,7 @@ public:
 			 * Moves the iterator to the next adjacent. This change the output of next() method in the next call to it.
 			 */
 			void advance();
-		
+
 		private:
 			uint _vSpace;
 			IMPL _type;

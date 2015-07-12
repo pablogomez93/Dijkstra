@@ -1,6 +1,6 @@
 #include "graph.h"
 
-Graph::Graph(uint n, bool isOrientedGraph, IMPL impl){
+Graph::Graph(uint n, bool isOrientedGraph, IMPL impl) {
 	n = n;
 	m = 0;
 	isOriented = isOrientedGraph;
@@ -12,23 +12,23 @@ Graph::Graph(uint n, bool isOrientedGraph, IMPL impl){
 		adjList = vector<list<pair<uint,float> > >(n, list<pair<uint,float> >());
 }
 
-bool Graph::isOrientedGraph() const{
+bool Graph::isOrientedGraph() const {
 	return isOriented;
 }
 
-uint Graph::getN() const{
+uint Graph::getN() const {
 	return n;
 }
 
-uint Graph::getM() const{
+uint Graph::getM() const {
 	return m;
 }
 
-vector<Edge>& Graph::getEdges(){
+vector<Edge>& Graph::getEdges() {
 	return edges;
 }
 
-float Graph::getEdgeWeight(uint v1, uint v2) const{
+float Graph::getEdgeWeight(uint v1, uint v2) const {
 	if(type == ADJACENCIES_MATRIX)
 		return matrix[v1-1][v2-1];
 	else
@@ -37,10 +37,10 @@ float Graph::getEdgeWeight(uint v1, uint v2) const{
 				return (*it).second;
 }
 
-bool Graph::areAdjacent(uint v1, uint v2) const{
+bool Graph::areAdjacent(uint v1, uint v2) const {
 	if(type == ADJACENCIES_MATRIX)
 		return matrix[v1-1][v2-1] != DEFAULT_WEIGHT;
-	else{
+	else {
 		for (list<pair<uint,float> >::const_iterator it = adjList[v1-1].begin(); it != adjList[v1-1].end(); it++)
 			if((*it).first == v2)
 				return true;
@@ -49,31 +49,31 @@ bool Graph::areAdjacent(uint v1, uint v2) const{
 	}
 }
 
-void Graph::applyEdge(uint v1, uint v2){
-	if(type == ADJACENCIES_MATRIX){
-		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT){
+void Graph::applyEdge(uint v1, uint v2) {
+	if(type == ADJACENCIES_MATRIX) {
+		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT) {
 			m++;
-			edges.push_back(Edge(v1,v2,1));
+			edges.push_back(Edge(v1, v2, 1));
 		}
 
 		matrix[v1-1][v2-1] = 1;
 
 		if(!isOriented)
 			matrix[v2-1][v1-1] = 1;
-	}else{
-		adjList[v1-1].push_back(make_pair(v2,1));
+	} else {
+		adjList[v1-1].push_back(make_pair(v2, 1));
 
 		if(!isOriented)
-			adjList[v2-1].push_back(make_pair(v1,1));
+			adjList[v2-1].push_back(make_pair(v1, 1));
 
 		m++;
-		edges.push_back(Edge(v1,v2,1));
+		edges.push_back(Edge(v1, v2, 1));
 	}
 }
 
-void Graph::applyEdge(uint v1, uint v2, float weight){
-	if(type == ADJACENCIES_MATRIX){
-		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT){
+void Graph::applyEdge(uint v1, uint v2, float weight) {
+	if(type == ADJACENCIES_MATRIX) {
+		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT) {
 			m++;
 			edges.push_back(Edge(v1,v2,weight));
 		}
@@ -82,7 +82,7 @@ void Graph::applyEdge(uint v1, uint v2, float weight){
 
 		if(!isOriented)
 			matrix[v2-1][v1-1] = weight;
-	}else{
+	} else {
 		adjList[v1-1].push_back(make_pair(v2, weight));
 
 		if(!isOriented)
@@ -94,21 +94,21 @@ void Graph::applyEdge(uint v1, uint v2, float weight){
 
 }
 
-void Graph::addVertex(){
-	if(type == ADJACENCIES_MATRIX){
+void Graph::addVertex() {
+	if(type == ADJACENCIES_MATRIX) {
 		for (int i = 0; i < n; ++i)
 			matrix[i].push_back(DEFAULT_WEIGHT);
 
-		matrix.push_back(vector<float>(n + 1, DEFAULT_WEIGHT));
+		matrix.push_back(vector<float>(n+1, DEFAULT_WEIGHT));
 
-	}else{
+	} else {
 		adjList.push_back(list<pair<uint,float> >());
 	}
 
 	n++;
 }
 
-const typename Graph::Iterator Graph::adjacentsOf(uint v) const{
+const typename Graph::Iterator Graph::adjacentsOf(uint v) const {
 	if(type == ADJACENCIES_MATRIX)
 		return Iterator(matrix[v-1], n, type);
 	else
@@ -123,13 +123,13 @@ const typename Graph::Iterator Graph::adjacentsOf(uint v) const{
  * Adjacents iterator implementation.
  */
 
-Graph::Iterator::Iterator(const vector<float>& conections, uint n, IMPL type){
+Graph::Iterator::Iterator(const vector<float>& conections, uint n, IMPL type) {
  	_values = conections;
 	_it = _values.begin();
 	_current = -1;
 
 	for (int current = 0; current < _vSpace; ++current)
-		if(_values[current] != DEFAULT_WEIGHT){
+		if(_values[current] != DEFAULT_WEIGHT) {
 			_current = current;
 			break;
 		}
@@ -138,7 +138,7 @@ Graph::Iterator::Iterator(const vector<float>& conections, uint n, IMPL type){
 	_type = type;
 }
 
-Graph::Iterator::Iterator(const list<pair<uint,float> >& adjacents, uint n, IMPL type){
+Graph::Iterator::Iterator(const list<pair<uint,float> >& adjacents, uint n, IMPL type) {
  	_adjacents = adjacents;
 	_iter = _adjacents.begin();
 
@@ -146,30 +146,30 @@ Graph::Iterator::Iterator(const list<pair<uint,float> >& adjacents, uint n, IMPL
 	_type = type;
 }
 
-void Graph::Iterator::advance(){
-	if(_type == ADJACENCIES_MATRIX){
+void Graph::Iterator::advance() {
+	if(_type == ADJACENCIES_MATRIX) {
 		_current++;
-		while(_current < _vSpace){
+		while(_current < _vSpace) {
 			if(_values[_current] != DEFAULT_WEIGHT)
 				break;
 
 			_current++;
 		}
 
-	}else
+	} else
 		_iter++;
 
 	return;
 }
 
-int Graph::Iterator::next() const{
+int Graph::Iterator::next() const {
 	if(_type == ADJACENCIES_MATRIX)
 		return _current + 1;
 	else
 		return (*_iter).first;
 }
 
-bool Graph::Iterator::thereIsMore() const{
+bool Graph::Iterator::thereIsMore() const {
 	if(_type == ADJACENCIES_MATRIX)
 		return -1 < _current && _current < _vSpace;
 	else

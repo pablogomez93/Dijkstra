@@ -21,26 +21,30 @@ uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
 }
 
 void dijkstra(Graph& g, uint v){
-	/* Declaring initial variables, set S will check the nodes in "secure zone" of Dijkstra's algorithm.
-	 * By default, node v is in the "secure zone".
-	 * Pi vector contains constantly the short path from v to all nodes in the secure zone (invariant of Dijkstra's algorithm).
-	 * By default, all shorts ways are infinity.
-	 */
-	vector<bool> S(g.getN(),false);
-	S[v-1] = true;
-	vector<float> pi(g.getN(),numeric_limits<float>::max());
-	
 	/*
-	 * Setting position of v in pi vector to 0, and replacing the position of each adjacent of v to the weight between it and v.
+	 * Declaring initial variables, set S will check the nodes in "secure zone" of Dijkstra's
+	 * algorithm, S will represents the "Secure zone".
+	 * By default, node v is in the "secure zone" from the begin of the algorithm.
+	 * Pi vector constantly constains the short path from v to all nodes in the secure zone
+	 * (invariant of Dijkstra's algorithm).
+	 * In the beginning of the algorithm, all shorts ways are considered infinity.
+	 */
+	vector<bool> S(g.getN(), false);
+	S[v-1] = true;
+	vector<float> pi(g.getN(), numeric_limits<float>::max());
+
+	/*
+	 * Setting distance of v in pi vector to 0, and replacing the distance of each node adjacent of
+	 * v to the weight between it and v.
 	 */
 	for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance())
-		pi[vAdjs.next()-1] = g.getEdgeWeight(v,vAdjs.next());
+		pi[vAdjs.next()-1] = g.getEdgeWeight(v, vAdjs.next());
 
 	pi[v-1] = 0;
-	
+
 	/*
-	 * Once generate initial variables and charge the correct weight to adjacents of v in pi vector, 
-	 * begin to expand the "secure zone".
+	 * Once generate initial variables and charge the correct weight to adjacents of v in pi vector,
+	 * lets begin to expand the "secure zone" until cover the entire graph.
 	 */
 	uint count = 1;
 	while(count < g.getN()){
@@ -50,23 +54,24 @@ void dijkstra(Graph& g, uint v){
 		uint u = getMinimunOfPI(pi, S);
 
 		/*
-		 * Set u as added to the S set.
+		 * Set u as added to the secure zone (S).
 		 */
 		S[u-1] = true;
-	
+
 		/*
-		 * Relax edges for adjacents nodes to u.
+		 * Relax edges for neighbor nodes i to u, where i is still in G\S
+		 * (where i is not in the secure zone).
 		 */
 		for (Adjacencies vAdjs = g.adjacentsOf(u); vAdjs.thereIsMore(); vAdjs.advance()){
 			int i = vAdjs.next();
 
-			if(pi[i-1] > pi[u-1] + g.getEdgeWeight(u,i))
+			if(!S[i-1] && pi[i-1] > pi[u-1] + g.getEdgeWeight(u,i))
 				pi[i-1] = pi[u-1] + g.getEdgeWeight(u,i);
-		}		
+		}
 
 		count++;
 	}
-	
+
 	/*
 	 * Algorithm end.
 	 * pi vector variable has all shortest paths, from original v to all nodes
@@ -75,7 +80,7 @@ void dijkstra(Graph& g, uint v){
 
 
 int main(){
-	//Set base variables of the graph
+	//Set configuration of the graph
 	uint nodesCount = 6;
 	bool isOriented = true;
 	IMPL implementation = ADJACENCIES_LIST;
@@ -88,7 +93,7 @@ int main(){
 	uint originNodeForDijkstra = 1;
 
 	Graph g(nodesCount, isOriented, implementation);
-	dijkstra(g,originNodeForDijkstra);
+	dijkstra(g, originNodeForDijkstra);
 
 	return 0;
 }

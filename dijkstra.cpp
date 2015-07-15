@@ -27,7 +27,7 @@ void dijkstra(Graph& g, uint v){
 	 * By default, node v is in the "secure zone" from the begin of the algorithm.
 	 * Pi vector constantly constains the short path from v to all nodes in the secure zone
 	 * (invariant of Dijkstra's algorithm).
-	 * In the beginning of the algorithm, all shorts ways are considered infinity.
+	 * In the beginning of the algorithm, the paths from v to all nodes are considered as infinity.
 	 */
 	vector<bool> S(g.getN(), false);
 	S[v-1] = true;

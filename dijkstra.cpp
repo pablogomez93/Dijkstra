@@ -37,6 +37,7 @@ vector<float> dijkstra(Graph& g, uint v){
 	 */
 	vector<bool> S(g.getN(), false);
 	S[v-1] = true;
+	vector<uint> predecessor(g.getN(), v);
 	vector<float> pi(g.getN(), numeric_limits<float>::max());
 
 	/*
@@ -71,8 +72,10 @@ vector<float> dijkstra(Graph& g, uint v){
 		for (Adjacencies vAdjs = g.adjacentsOf(u); vAdjs.thereIsMore(); vAdjs.advance()){
 			int i = vAdjs.next();
 
-			if(!S[i-1] && pi[i-1] > pi[u-1] + g.getEdgeWeight(u,i))
+			if(!S[i-1] && pi[i-1] > pi[u-1] + g.getEdgeWeight(u,i)) {
 				pi[i-1] = pi[u-1] + g.getEdgeWeight(u,i);
+				predecessor[i-1] = u;
+			}
 		}
 
 		count++;

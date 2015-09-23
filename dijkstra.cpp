@@ -10,7 +10,7 @@ using namespace std;
 
 void print_final_minimum_distances(int originNode, vector<float> paths) {
 	for (int i = 0; i < paths.size(); ++i)
-		printf("Desde %d hasta %d: %f \n", originNode, i+1, paths[i]);
+		printf("From node %d to node %d: %f \n", originNode, i+1, paths[i]);
 }
 
 uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){

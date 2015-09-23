@@ -33,8 +33,8 @@ float Graph::getEdgeWeight(uint v1, uint v2) const {
 		return matrix[v1-1][v2-1];
 	else
 		for (list<pair<uint,float> >::const_iterator it = adjList[v1-1].begin(); it != adjList[v1-1].end(); it++)
-			if((*it).first == v2)
-				return (*it).second;
+			if(it->first == v2)
+				return it->second;
 }
 
 bool Graph::areAdjacent(uint v1, uint v2) const {
@@ -42,7 +42,7 @@ bool Graph::areAdjacent(uint v1, uint v2) const {
 		return matrix[v1-1][v2-1] != DEFAULT_WEIGHT;
 	else {
 		for (list<pair<uint,float> >::const_iterator it = adjList[v1-1].begin(); it != adjList[v1-1].end(); it++)
-			if((*it).first == v2)
+			if(it->first == v2)
 				return true;
 
 		return false;
@@ -166,7 +166,7 @@ int Graph::Iterator::next() const {
 	if(_type == ADJACENCIES_MATRIX)
 		return _current + 1;
 	else
-		return (*_iter).first;
+		return _iter->first;
 }
 
 bool Graph::Iterator::thereIsMore() const {

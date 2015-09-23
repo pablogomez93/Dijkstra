@@ -119,7 +119,7 @@ int main(){
 	/**
 	 * Executing Dijkstra's algorithm :)
 	 */
-	vector<float> paths = dijkstra(g, originNodeForDijkstra);
+	auto paths = dijkstra(g, originNodeForDijkstra);
 
 	print_final_minimum_distances(originNodeForDijkstra, paths);
 

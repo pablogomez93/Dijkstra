@@ -1,11 +1,17 @@
 #include "graph.h"
 #include "vector"
+#include <stdio.h>
 #include <limits>
 
 typedef unsigned int uint;
 typedef Graph::Iterator Adjacencies;
 
 using namespace std;
+
+void print_final_minimum_distances(int originNode, vector<float> paths) {
+	for (int i = 0; i < paths.size(); ++i)
+		printf("Desde %d hasta %d: %f \n", originNode, i+1, paths[i]);
+}
 
 uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
 	uint minimum = 0;
@@ -20,7 +26,7 @@ uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
 	return minimum+1;
 }
 
-void dijkstra(Graph& g, uint v){
+vector<float> dijkstra(Graph& g, uint v){
 	/*
 	 * Declaring initial variables, set S will check the nodes in "secure zone" of Dijkstra's
 	 * algorithm, S will represents the "Secure zone".
@@ -76,24 +82,47 @@ void dijkstra(Graph& g, uint v){
 	 * Algorithm end.
 	 * pi vector variable has all shortest paths, from original v to all nodes
 	 */
+
+	 return pi;
 };
 
 
 int main(){
 	//Set configuration of the graph
-	uint nodesCount = 6;
+	uint nodesCount = 4;
 	bool isOriented = true;
 	IMPL implementation = ADJACENCIES_LIST;
+	Graph g(nodesCount, isOriented, implementation);
 
 	/*
 	 * HERE: Charge all edges you want, using the graph API.
 	 */
+	 g.applyEdge(1,2,6);
+	 g.applyEdge(1,3,3);
+	 g.applyEdge(1,4,5);
+	 
+	 g.applyEdge(2,1,5);
+	 g.applyEdge(2,3,15);
+	 g.applyEdge(2,4,9);
+	 
+	 g.applyEdge(3,1,5);
+	 g.applyEdge(3,2,1);
+	 g.applyEdge(3,4,15);
+	 
+	 g.applyEdge(4,1,5);
+	 g.applyEdge(4,2,1);
+	 g.applyEdge(4,3,15);
 
 	//Set the origin node to calculate the shortest paths from it to all of the rest nodes, with Dijkstra.
 	uint originNodeForDijkstra = 1;
+	
+	/**
+	 * Executing Dijkstra's algorithm :)
+	 */
+	vector<float> paths = dijkstra(g, originNodeForDijkstra);
 
-	Graph g(nodesCount, isOriented, implementation);
-	dijkstra(g, originNodeForDijkstra);
+	print_final_minimum_distances(originNodeForDijkstra, paths);
 
 	return 0;
 }
+

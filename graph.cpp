@@ -1,7 +1,7 @@
 #include "graph.h"
 
-Graph::Graph(uint n, bool isOrientedGraph, IMPL impl) {
-	n = n;
+Graph::Graph(uint nodesSpaceSize, bool isOrientedGraph, IMPL impl) {
+	n = nodesSpaceSize;
 	m = 0;
 	isOriented = isOrientedGraph;
 	type = impl;

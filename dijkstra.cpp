@@ -8,9 +8,37 @@ typedef Graph::Iterator Adjacencies;
 
 using namespace std;
 
-void print_final_minimum_distances(int originNode, vector<float> paths) {
+void print_final_shortest_distances(uint originNode, vector<float> paths) {
 	for (int i = 0; i < paths.size(); ++i)
-		printf("From node %d to node %d: %f \n", originNode, i+1, paths[i]);
+		printf("From node %u to node %d: %f \n", originNode, i+1, paths[i]);
+}
+
+void print_final_shortest_paths(uint originNode, vector<uint> paths) {
+	vector<uint> path;
+	path.reserve(paths.size());
+
+	for (uint i = 0; i < paths.size(); ++i) {		
+		printf("From node %u to node %u: ", originNode, i+1);
+
+			path.clear();
+			path.push_back(i+1);
+
+			if(i+1 != originNode){
+				uint predecessor = paths[i];
+				while(predecessor != originNode) {
+					path.push_back(predecessor);
+					predecessor = paths[predecessor-1];
+				}
+
+				path.push_back(originNode);
+			}
+
+
+			for (int i = path.size()-1; i >= 0; --i)
+				printf("%u ", path[i]);
+
+			printf("\n");
+	}
 }
 
 uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
@@ -26,17 +54,24 @@ uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
 	return minimum+1;
 }
 
-vector<float> dijkstra(Graph& g, uint v){
+vector<uint> dijkstra(Graph& g, uint v){
 	/*
 	 * Declaring initial variables, set S will check the nodes in "secure zone" of Dijkstra's
 	 * algorithm, S will represents the "Secure zone".
 	 * By default, node v is in the "secure zone" from the begin of the algorithm.
-	 * Pi vector constantly constains the short path from v to all nodes in the secure zone
-	 * (invariant of Dijkstra's algorithm).
-	 * In the beginning of the algorithm, the paths from v to all nodes are considered as infinity.
+
 	 */
 	vector<bool> S(g.getN(), false);
 	S[v-1] = true;
+
+	/**
+	 * pi vector constantly constains the DISTANCE of the shortest path from v to all nodes in the secure zone
+	 * (invariant of Dijkstra's algorithm).
+	 * In the beginning of the algorithm, the paths from v to all nodes are considered as infinity.
+
+	 * predecessor vector constantly constains the SHORTEST PATH from v to all nodes in the secure zone.
+	 * Since the secure zone is just v, at the beginning the paths from v to all nodes are just... v.
+	 */
 	vector<uint> predecessor(g.getN(), v);
 	vector<float> pi(g.getN(), numeric_limits<float>::max());
 
@@ -83,10 +118,11 @@ vector<float> dijkstra(Graph& g, uint v){
 
 	/*
 	 * Algorithm end.
-	 * pi vector variable has all shortest paths, from original v to all nodes
+	 * - predecessor vector contains all shortest paths from v to all nodes;
+	 * - pi vector contains all distances for shortest paths from original v to all nodes
 	 */
 
-	 return pi;
+	 return predecessor;
 };
 
 
@@ -100,21 +136,21 @@ int main(){
 	/*
 	 * HERE: Charge all edges you want, using the graph API.
 	 */
-	 g.applyEdge(1,2,6);
-	 g.applyEdge(1,3,3);
-	 g.applyEdge(1,4,5);
+	 g.applyEdge(1,2,1);
+	 g.applyEdge(1,3,1000);
+	 g.applyEdge(1,4,1000);
 	 
-	 g.applyEdge(2,1,5);
-	 g.applyEdge(2,3,15);
-	 g.applyEdge(2,4,9);
+	 g.applyEdge(2,1,1000);
+	 g.applyEdge(2,3,1);
+	 g.applyEdge(2,4,1000);
 	 
-	 g.applyEdge(3,1,5);
-	 g.applyEdge(3,2,1);
-	 g.applyEdge(3,4,15);
+	 g.applyEdge(3,1,1000);
+	 g.applyEdge(3,2,1000);
+	 g.applyEdge(3,4,1000);
 	 
-	 g.applyEdge(4,1,5);
-	 g.applyEdge(4,2,1);
-	 g.applyEdge(4,3,15);
+	 g.applyEdge(4,1,1);
+	 g.applyEdge(4,2,1000);
+	 g.applyEdge(4,3,1000);
 
 	//Set the origin node to calculate the shortest paths from it to all of the rest nodes, with Dijkstra.
 	uint originNodeForDijkstra = 1;
@@ -124,7 +160,7 @@ int main(){
 	 */
 	auto paths = dijkstra(g, originNodeForDijkstra);
 
-	print_final_minimum_distances(originNodeForDijkstra, paths);
+	print_final_shortest_paths(originNodeForDijkstra, paths);
 
 	return 0;
 }

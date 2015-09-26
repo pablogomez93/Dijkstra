@@ -1,22 +1,22 @@
 #include "dijkstra.h"
 
+/**
+   paths vector constantly constains the DISTANCE and PREDECESSOR for the path from source
+   to de ith node in the secure zone (invariant of Dijkstra's algorithm).
+
+   In the beginning of the algorithm, the paths from source to all nodes are considered as infinity.
+   Since, at the beginning the secure zone is just the source node, source to all nodes are just the
+   same source node (obviously).
+
+   Q is the priority queue (using a Fibonacci Heap implementatión of mine) that we
+   use to select the node which minimizes the distance to the secure zone.
+   Using a Fibonacci heap implementation for the priority queue, we get the
+   best asymptotical running time of Dijkstra! :)
+   O( |E| +  |V| log|V| ) 
+ */
 
 
 vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
-	/**
-	   paths vector constantly constains the DISTANCE and PREDECESSOR for the path from source
-	   to de ith node in the secure zone (invariant of Dijkstra's algorithm).
-
-	   In the beginning of the algorithm, the paths from source to all nodes are considered as infinity.
-	   Since, at the beginning the secure zone is just the source node, source to all nodes are just the
-	   same source node (obviously).
-
-	   Q is the priority queue (using a Fibonacci Heap implementatión) that we
-	   use to select the node which minimizes the distance to the secure zone.
-	   Using a Fibonacci heap implementation for the priority queue, we get the
-	   best asymptotical running time of Dijkstra! :)
-	   O( |E| +  |V| log|V| ) 
-	 */
 	FibonacciHeap Q = FibonacciHeap();
 	vector<bool> S(g.getN(), false);
 	vector<pair<Distance, Predecessor> > paths(g.getN(), make_pair(numeric_limits<float>::max(), source));

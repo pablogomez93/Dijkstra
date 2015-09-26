@@ -1,4 +1,4 @@
 Dijkstra
 ========
 
-A implementation of Dijkstra's algorithm, with Graph class, to find shortest paths between points in a map.
+An implementation of Dijkstra's algorithm to find shortest paths between points in a map using a priority queue based on a tiny Fibonacci Heap implementation of mine and  a Graph class.

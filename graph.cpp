@@ -162,11 +162,11 @@ void Graph::Iterator::advance() {
 	return;
 }
 
-int Graph::Iterator::next() const {
+pair<uint,float> Graph::Iterator::next() const {
 	if(_type == ADJACENCIES_MATRIX)
-		return _current + 1;
+		return make_pair(_current + 1, _values[_current]);
 	else
-		return _iter->first;
+		return (*_iter);
 }
 
 bool Graph::Iterator::thereIsMore() const {

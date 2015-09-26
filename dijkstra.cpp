@@ -1,167 +1,93 @@
-#include "graph.h"
-#include "vector"
-#include <stdio.h>
-#include <limits>
-
-typedef unsigned int uint;
-typedef Graph::Iterator Adjacencies;
-
-using namespace std;
-
-void print_final_shortest_distances(uint originNode, vector<float> paths) {
-	for (int i = 0; i < paths.size(); ++i)
-		printf("From node %u to node %d: %f \n", originNode, i+1, paths[i]);
-}
-
-void print_final_shortest_paths(uint originNode, vector<uint> paths) {
-	vector<uint> path;
-	path.reserve(paths.size());
-
-	for (uint i = 0; i < paths.size(); ++i) {		
-		printf("From node %u to node %u: ", originNode, i+1);
-
-			path.clear();
-			path.push_back(i+1);
-
-			if(i+1 != originNode){
-				uint predecessor = paths[i];
-				while(predecessor != originNode) {
-					path.push_back(predecessor);
-					predecessor = paths[predecessor-1];
-				}
-
-				path.push_back(originNode);
-			}
+#include "dijkstra.h"
 
 
-			for (int i = path.size()-1; i >= 0; --i)
-				printf("%u ", path[i]);
 
-			printf("\n");
-	}
-}
+vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
+	/**
+	   paths vector constantly constains the DISTANCE and PREDECESSOR for the path from source
+	   to de ith node in the secure zone (invariant of Dijkstra's algorithm).
 
-uint getMinimunOfPI(vector<float>& pi, vector<bool>& S){
-	uint minimum = 0;
-	float minimal = numeric_limits<float>::max();
+	   In the beginning of the algorithm, the paths from source to all nodes are considered as infinity.
+	   Since, at the beginning the secure zone is just the source node, source to all nodes are just the
+	   same source node (obviously).
 
-	for (uint i = 0; i < pi.size(); ++i)
-		if(!S[i] && pi[i] < minimal){
-			minimum = i;
-			minimal = pi[i];
-		}
-
-	return minimum+1;
-}
-
-vector<uint> dijkstra(Graph& g, uint v){
-	/*
-	 * Declaring initial variables, set S will check the nodes in "secure zone" of Dijkstra's
-	 * algorithm, S will represents the "Secure zone".
-	 * By default, node v is in the "secure zone" from the begin of the algorithm.
-
+	   Q is the priority queue (using a Fibonacci Heap implementatión) that we
+	   use to select the node which minimizes the distance to the secure zone.
+	   Using a Fibonacci heap implementation for the priority queue, we get the
+	   best asymptotical running time of Dijkstra! :)
+	   O( |E| +  |V| log|V| ) 
 	 */
+	FibonacciHeap Q = FibonacciHeap();
 	vector<bool> S(g.getN(), false);
-	S[v-1] = true;
-
-	/**
-	 * pi vector constantly constains the DISTANCE of the shortest path from v to all nodes in the secure zone
-	 * (invariant of Dijkstra's algorithm).
-	 * In the beginning of the algorithm, the paths from v to all nodes are considered as infinity.
-
-	 * predecessor vector constantly constains the SHORTEST PATH from v to all nodes in the secure zone.
-	 * Since the secure zone is just v, at the beginning the paths from v to all nodes are just... v.
-	 */
-	vector<uint> predecessor(g.getN(), v);
-	vector<float> pi(g.getN(), numeric_limits<float>::max());
+	vector<pair<Distance, Predecessor> > paths(g.getN(), make_pair(numeric_limits<float>::max(), source));
 
 	/*
-	 * Setting distance of v in pi vector to 0, and replacing the distance of each node adjacent of
-	 * v to the weight between it and v.
+	   Setting distance of source node to 0.
+	   Marked source as a node of the secure zone (Dijkstra assumes that the source node is already in the secure zone).
 	 */
-	for (Adjacencies vAdjs = g.adjacentsOf(v); vAdjs.thereIsMore(); vAdjs.advance())
-		pi[vAdjs.next()-1] = g.getEdgeWeight(v, vAdjs.next());
-
-	pi[v-1] = 0;
+	S[source-1] = true;
+	paths[source-1].first = 0;
 
 	/*
-	 * Once generate initial variables and charge the correct weight to adjacents of v in pi vector,
-	 * lets begin to expand the "secure zone" until cover the entire graph.
+	   Up the priority and distance values of the nodes adyacents to the source node.
+	   The heap priority for one X node is the distance between X and the secure zone.
+	   Since the secure zone is just the source node, this is the same to update the priority
+	   of the adjacents nodes of the source.
 	 */
-	uint count = 1;
-	while(count < g.getN()){
-		/*
-		 * Select the node out of the "secure zone" wich minimize the distance to the secure zone.
-		 */
-		uint u = getMinimunOfPI(pi, S);
+	Q.insert_nodes(g, source);
 
-		/*
-		 * Set u as added to the secure zone (S).
-		 */
-		S[u-1] = true;
+	for (Adjacencies vAdjs = g.adjacentsOf(source); vAdjs.thereIsMore(); vAdjs.advance()) {
+	  	Q.node_up((vAdjs.next().first) - 1, vAdjs.next().second);
 
-		/*
-		 * Relax edges for neighbor nodes i to u, where i is still in G\S
-		 * (where i is not in the secure zone).
-		 */
-		for (Adjacencies vAdjs = g.adjacentsOf(u); vAdjs.thereIsMore(); vAdjs.advance()){
-			int i = vAdjs.next();
+	  	paths[(vAdjs.next().first)-1].first = vAdjs.next().second;
+	}
 
-			if(!S[i-1] && pi[i-1] > pi[u-1] + g.getEdgeWeight(u,i)) {
-				pi[i-1] = pi[u-1] + g.getEdgeWeight(u,i);
-				predecessor[i-1] = u;
+
+	/*
+	   Once generated initial variables and charge the correct weight to 
+	   the all nodes in the priority queue, lets begin to expand the 
+	   "secure zone" until cover the entire graph.
+	 */
+	while(!Q.isEmpty()){
+			/*
+			   Select the node out of the "secure zone" wich minimize the distance to the secure zone.
+			   O( log n ) with a Fibonacci heap implementation :D 
+			 */
+			auto u = Q.extract_min();
+
+			/*
+			 * Set u as added to the secure zone (S).
+			 */
+			S[u-1] = true;
+
+			/*
+			 * Relax edges for neighbor nodes i to u, where i is still in G\S
+			 * (where i is not in the secure zone).
+			 */
+			for (Adjacencies vAdjs = g.adjacentsOf(u); vAdjs.thereIsMore(); vAdjs.advance()) {;
+					auto i = vAdjs.next().first;
+
+					if(!S[i-1] && paths[i-1].first > paths[u-1].first + g.getEdgeWeight(u,i)) {
+						paths[i-1].first = paths[u-1].first + g.getEdgeWeight(u,i);
+						paths[i-1].second = u;
+
+						/*
+						  Up the prority of the nodes
+						 */
+						Q.node_up(i-1, paths[u-1].first + g.getEdgeWeight(u,i));
+					}
+
 			}
-		}
 
-		count++;
 	}
 
 	/*
-	 * Algorithm end.
-	 * - predecessor vector contains all shortest paths from v to all nodes;
-	 * - pi vector contains all distances for shortest paths from original v to all nodes
+	   Algorithm end.
+       * paths vector contains the minimum distance between the source node and the ith node
+         in the index i-1  (paths[i-1].first).
+	   * Also, in the same index, it contains the predecessor of the ith node to get the
+	     shortest path from the source in the second member (paths[i-1].second).
 	 */
 
-	 return predecessor;
+	 return paths;
 };
-
-
-int main(){
-	//Set configuration of the graph
-	uint nodesCount = 4;
-	bool isOriented = true;
-	IMPL implementation = ADJACENCIES_LIST;
-	Graph g(nodesCount, isOriented, implementation);
-
-	/*
-	 * HERE: Charge all edges you want, using the graph API.
-	 */
-	 g.applyEdge(1,2,1);
-	 g.applyEdge(1,3,1000);
-	 g.applyEdge(1,4,1000);
-	 
-	 g.applyEdge(2,1,1000);
-	 g.applyEdge(2,3,1);
-	 g.applyEdge(2,4,1000);
-	 
-	 g.applyEdge(3,1,1000);
-	 g.applyEdge(3,2,1000);
-	 g.applyEdge(3,4,1000);
-	 
-	 g.applyEdge(4,1,1);
-	 g.applyEdge(4,2,1000);
-	 g.applyEdge(4,3,1000);
-
-	//Set the origin node to calculate the shortest paths from it to all of the rest nodes, with Dijkstra.
-	uint originNodeForDijkstra = 1;
-	
-	/**
-	 * Executing Dijkstra's algorithm :)
-	 */
-	auto paths = dijkstra(g, originNodeForDijkstra);
-
-	print_final_shortest_paths(originNodeForDijkstra, paths);
-
-	return 0;
-}
-

@@ -102,7 +102,7 @@ public:
 			/*
 			 * Get actual adjacent of the iterator. This not modify the iterator status.
 			 */
-			int next() const;
+			pair<uint,float> next() const;
 
 			/*
 			 * Indicates if exist an adjacent node for review

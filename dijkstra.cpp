@@ -83,11 +83,11 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 
 	/*
 	   Algorithm end.
-       * paths vector contains the minimum distance between the source node and the ith node
-         in the index i-1  (paths[i-1].first).
+           * paths vector contains the minimum distance between the source node and the ith node
+             in the index i-1  (paths[i-1].first).
 	   * Also, in the same index, it contains the predecessor of the ith node to get the
 	     shortest path from the source in the second member (paths[i-1].second).
-	 */
+	*/
 
 	 return paths;
 };

@@ -25,11 +25,12 @@ void print_results(uint originNode, vector<pair<Distance, Predecessor> > paths) 
 				path.push_back(originNode);
 			}
 
+			printf("\n   Shortest path: ");
 
 			for (int i = path.size()-1; i >= 0; --i)
 				printf("%u ", path[i]);
 
-			printf("\n   Distance: %f\n\n", paths[i].first);
+			printf("   with a distance: %f\n", paths[i].first);
 	}
 }
 

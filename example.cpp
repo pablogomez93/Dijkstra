@@ -47,20 +47,20 @@ int main(){
 	 * HERE: Charge all edges you want, using the graph API.
 	 */
 	 g.applyEdge(1, 2, 1);
-	 g.applyEdge(1, 3, 1000);
-	 g.applyEdge(1, 4, 1001);
+	 g.applyEdge(1, 3, 5435);
+	 g.applyEdge(1, 4, 4277);
 	 
-	 g.applyEdge(2, 1, 1002);
-	 g.applyEdge(2, 3, 2);
-	 g.applyEdge(2, 4, 1003);
+	 g.applyEdge(2, 1, 4343);
+	 g.applyEdge(2, 3, 1212);
+	 g.applyEdge(2, 4, 19);
 	 
-	 g.applyEdge(3, 1, 1004);
-	 g.applyEdge(3, 2, 1005);
-	 g.applyEdge(3, 4, 1006);
+	 g.applyEdge(3, 1, 1654);
+	 g.applyEdge(3, 2, 1436);
+	 g.applyEdge(3, 4, 192);
 	 
-	 g.applyEdge(4, 1, 3);
-	 g.applyEdge(4, 2, 1007);
-	 g.applyEdge(4, 3, 1008);
+	 g.applyEdge(4, 1, 1);
+	 g.applyEdge(4, 2, 861);
+	 g.applyEdge(4, 3, 242);
 
 	//Set the origin node to calculate the shortest paths from it to all of the rest nodes, with Dijkstra.
 	uint sourceNode = 1;

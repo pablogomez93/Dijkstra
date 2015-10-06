@@ -8,9 +8,9 @@
    Since, at the beginning the secure zone is just the source node, source to all nodes are just the
    same source node (obviously).
 
-   Q is the priority queue (using a Fibonacci Heap implementatión of mine) that we
+   Q is the priority queue (based on a Fibonacci Heap implementatión of mine) that we
    use to select the node which minimizes the distance to the secure zone.
-   Using a Fibonacci heap implementation for the priority queue, we get the
+   Using a Fibonacci heap implementation for the priority queue we get the
    best asymptotical running time of Dijkstra! :)
    O( |E| +  |V| log|V| ) 
  */
@@ -34,12 +34,18 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 	   Since the secure zone is just the source node, this is the same to update the priority
 	   of the adjacents nodes of the source.
 	 */
-	Q.insert_nodes(g, source);
+	for (int i = 0; i < g.getN(); ++i)
+		if(i+1 == source)
+			Q.insert(0, i+1);
+		else
+			Q.insert(numeric_limits<float>::max(), i+1);
+
+	Q.extract_min();
 
 	for (Adjacencies vAdjs = g.adjacentsOf(source); vAdjs.thereIsMore(); vAdjs.advance()) {
-	  	Q.node_up((vAdjs.next().first) - 1, vAdjs.next().second);
+		Q.node_up(vAdjs.next().first - 1 , vAdjs.next().second);
 
-	  	paths[(vAdjs.next().first)-1].first = vAdjs.next().second;
+	  	paths[vAdjs.next().first - 1].first = vAdjs.next().second;
 	}
 
 
@@ -48,10 +54,10 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 	   the all nodes in the priority queue, lets begin to expand the 
 	   "secure zone" until cover the entire graph.
 	 */
-	while(!Q.isEmpty()){
+	while(!Q.empty()){
 			/*
 			   Select the node out of the "secure zone" wich minimize the distance to the secure zone.
-			   O( log n ) with a Fibonacci heap implementation :D 
+			   O( log n ) (amortized) with a Priority queue implementation based on a Fibonacci heap :D 
 			 */
 			auto u = Q.extract_min();
 

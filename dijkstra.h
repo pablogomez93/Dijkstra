@@ -1,5 +1,5 @@
 #include "graph.h"
-#include "fibonacci-heap/fib-heap.h"
+#include "fibonacci-heap.h"
 #include "vector"
 #include <limits>
 

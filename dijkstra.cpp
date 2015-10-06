@@ -17,42 +17,35 @@
 
 
 vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
-	FibonacciHeap Q = FibonacciHeap();
+	/*
+	  S will mark the nodes in the secure zone.
+	  paths and Q are described above.
+	*/
 	vector<bool> S(g.getN(), false);
-	vector<pair<Distance, Predecessor> > paths(g.getN(), make_pair(numeric_limits<float>::max(), source));
+	FibonacciHeap Q = FibonacciHeap();
+	vector<pair<Distance, Predecessor> > paths(g.getN(), make_pair(FLOAT_INFINITY, source));
 
 	/*
-	   Setting distance of source node to 0.
-	   Marked source as a node of the secure zone (Dijkstra assumes that the source node is already in the secure zone).
+	  Setting distance of source node to 0.
+	  Marked source as a node of the secure zone (Dijkstra assumes that the source node is already in the secure zone).
 	 */
 	S[source-1] = true;
 	paths[source-1].first = 0;
 
 	/*
-	   Up the priority and distance values of the nodes adyacents to the source node.
-	   The heap priority for one X node is the distance between X and the secure zone.
-	   Since the secure zone is just the source node, this is the same to update the priority
-	   of the adjacents nodes of the source.
+	  The heap priority for one node 'X' is the distance between X and the secure zone.
+	  Since the secure zone is just the source node, only the source node has priority 0.
 	 */
 	for (int i = 0; i < g.getN(); ++i)
 		if(i+1 == source)
 			Q.insert(0, i+1);
 		else
-			Q.insert(numeric_limits<float>::max(), i+1);
-
-	Q.extract_min();
-
-	for (Adjacencies vAdjs = g.adjacentsOf(source); vAdjs.thereIsMore(); vAdjs.advance()) {
-		Q.node_up(vAdjs.next().first - 1 , vAdjs.next().second);
-
-	  	paths[vAdjs.next().first - 1].first = vAdjs.next().second;
-	}
-
+			Q.insert(FLOAT_INFINITY, i+1);
 
 	/*
-	   Once generated initial variables and charge the correct weight to 
-	   the all nodes in the priority queue, lets begin to expand the 
-	   "secure zone" until cover the entire graph.
+	  Once generated initial variables and charge the correct weight to 
+	  the all nodes in the priority queue, lets begin to expand the 
+	  "secure zone" until cover the entire graph.
 	 */
 	while(!Q.empty()){
 			/*
@@ -62,13 +55,13 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 			auto u = Q.extract_min();
 
 			/*
-			 * Set u as added to the secure zone (S).
+			   Set u as added to the secure zone (S).
 			 */
 			S[u-1] = true;
 
 			/*
-			 * Relax edges for neighbor nodes i to u, where i is still in G\S
-			 * (where i is not in the secure zone).
+			   Relax edges for neighbor nodes i to u, where i is still in G\S
+			   (where i is not in the secure zone).
 			 */
 			for (Adjacencies vAdjs = g.adjacentsOf(u); vAdjs.thereIsMore(); vAdjs.advance()) {;
 					auto i = vAdjs.next().first;
@@ -78,7 +71,7 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 						paths[i-1].second = u;
 
 						/*
-						  Up the prority of the nodes
+						   Up the prority of the nodes
 						 */
 						Q.node_up(i-1, paths[u-1].first + g.getEdgeWeight(u,i));
 					}
@@ -88,10 +81,10 @@ vector<pair<Distance, Predecessor> > dijkstra(Graph& g, uint source){
 	}
 
 	/*
-	   Algorithm end.
-           * paths vector contains the minimum distance between the source node and the ith node
+       Algorithm end.
+       * paths vector contains the minimum distance between the source node and the ith node
              in the index i-1  (paths[i-1].first).
-	   * Also, in the same index, it contains the predecessor of the ith node to get the
+       * Also, in the same index, it contains the predecessor of the ith node to get the
 	     shortest path from the source in the second member (paths[i-1].second).
 	*/
 

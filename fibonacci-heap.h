@@ -154,8 +154,6 @@ void _consolidate() {
 			roots_sort_by_degree[d] = x;
     }
 
-    _min = _roots.end();
-
     for (int i = 0; i < roots_sort_by_degree.size(); i++)
 	    	if(roots_sort_by_degree[i] != nullptr) {
 	    		if(_min == _roots.end())	

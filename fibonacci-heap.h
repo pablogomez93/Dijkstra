@@ -129,10 +129,10 @@ void _swap(Node** x, Node** y) {
 }
 
 void _consolidate() {
-	vector<Node*> roots_sort_by_degree;
-	roots_sort_by_degree.reserve(log2(_n));
+    vector<Node*> roots_sort_by_degree;
+    roots_sort_by_degree.reserve(log2(_n));
 
-	for (int i = 0; i <= log2(_n); i++)
+    for (int i = 0; i <= log2(_n); i++)
 			roots_sort_by_degree.push_back(nullptr);
 
     for (int i = _roots.size(); i > 0; i--) {

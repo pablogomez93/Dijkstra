@@ -1,121 +1,264 @@
 #include "graph.h"
+#include <sstream>
+#include <fstream>
+#include <utility>
+#include <iostream>
+#include <limits>
 
-Graph::Graph(uint nodesSpaceSize, bool isOrientedGraph, IMPL impl) {
-	n = nodesSpaceSize;
-	m = 0;
-	isOriented = isOrientedGraph;
-	type = impl;
-	edges = vector<Edge>();
-	if(type == ADJACENCIES_MATRIX)
-		matrix = vector<vector<float> > (n, vector<float>(n, DEFAULT_WEIGHT));
-	else
-		adjList = vector<list<pair<uint,float> > >(n, list<pair<uint,float> >());
+using namespace std;
+
+const float DEFAULT_WEIGHT = numeric_limits<float>::max();
+
+Graph::Graph(uint nodesSpaceSize, bool oriented, IMPL impl) {
+    isOriented = oriented;
+    type = impl;
+    nodes = vector<Node>(nodesSpaceSize, Graph::Node());
+
+    if(type == ADJACENCIES_MATRIX)
+        matrix = vector<vector<float> >(nodesSpaceSize, vector<float>(nodesSpaceSize, DEFAULT_WEIGHT));
+    else
+        adjList = vector<list<pair<uint,float> > >(nodesSpaceSize, list<pair<uint,float> >());
 }
 
 bool Graph::isOrientedGraph() const {
-	return isOriented;
+    return isOriented;
 }
 
-uint Graph::getN() const {
-	return n;
+uint Graph::getNodesCount() const {
+    return (uint) nodes.size();
 }
 
-uint Graph::getM() const {
-	return m;
+uint Graph::getEdgesCount() const {
+    return edges.size();
 }
 
-vector<Edge>& Graph::getEdges() {
-	return edges;
+list<Graph::Edge>& Graph::getEdges() {
+    return edges;
+}
+
+
+bool Graph::isIsolatedNode(uint v) const {
+    return nodes[v].isolated;
 }
 
 float Graph::getEdgeWeight(uint v1, uint v2) const {
-	if(type == ADJACENCIES_MATRIX)
-		return matrix[v1-1][v2-1];
-	else
-		for (list<pair<uint,float> >::const_iterator it = adjList[v1-1].begin(); it != adjList[v1-1].end(); it++)
-			if(it->first == v2)
-				return it->second;
+    if(type == ADJACENCIES_MATRIX)
+        return matrix[v1][v2];
+    else
+        for (const auto& edge : adjList[v1]) 
+            if (edge.first == v2) 
+                return edge.second;
+
+    return -1;
 }
 
 bool Graph::areAdjacent(uint v1, uint v2) const {
-	if(type == ADJACENCIES_MATRIX)
-		return matrix[v1-1][v2-1] != DEFAULT_WEIGHT;
-	else {
-		for (list<pair<uint,float> >::const_iterator it = adjList[v1-1].begin(); it != adjList[v1-1].end(); it++)
-			if(it->first == v2)
-				return true;
+    if(type == ADJACENCIES_MATRIX)
+        return matrix[v1][v2] != DEFAULT_WEIGHT;
+    else {
+        for (const auto& edge : adjList[v1])
+            if (edge.first == v2)
+                return true;
 
-		return false;
-	}
-}
-
-void Graph::applyEdge(uint v1, uint v2) {
-	if(type == ADJACENCIES_MATRIX) {
-		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT) {
-			m++;
-			edges.push_back(Edge(v1, v2, 1));
-		}
-
-		matrix[v1-1][v2-1] = 1;
-
-		if(!isOriented)
-			matrix[v2-1][v1-1] = 1;
-	} else {
-		adjList[v1-1].push_back(make_pair(v2, 1));
-
-		if(!isOriented)
-			adjList[v2-1].push_back(make_pair(v1, 1));
-
-		m++;
-		edges.push_back(Edge(v1, v2, 1));
-	}
+        return false;
+    }
 }
 
 void Graph::applyEdge(uint v1, uint v2, float weight) {
-	if(type == ADJACENCIES_MATRIX) {
-		if(matrix[v1-1][v2-1] == DEFAULT_WEIGHT) {
-			m++;
-			edges.push_back(Edge(v1,v2,weight));
-		}
+    if(type == ADJACENCIES_MATRIX) {
+        if(matrix[v1][v2] == DEFAULT_WEIGHT)
+            edges.push_back(Edge(v1,v2,weight));
 
-		matrix[v1-1][v2-1] = weight;
+        matrix[v1][v2] = weight;
 
-		if(!isOriented)
-			matrix[v2-1][v1-1] = weight;
-	} else {
-		adjList[v1-1].push_back(make_pair(v2, weight));
+        if(!isOriented)
+            matrix[v2][v1] = weight;
+    } else {
+        adjList[v1].push_back(make_pair(v2, weight));
 
-		if(!isOriented)
-			adjList[v2-1].push_back(make_pair(v1, weight));
+        if(!isOriented)
+            adjList[v2].push_back(make_pair(v1, weight));
 
-		m++;
-		edges.push_back(Edge(v1,v2,weight));
-	}
+        edges.push_back(Edge(v1,v2,weight));
+    }
+
+    //Update nodes status, input degree, output degree and isolated state
+    nodes[v1].isolated = false;
+    nodes[v2].isolated = false;
+
+    nodes[v1].dOut++;
+    nodes[v2].dIn++;
+    
+    if(!isOriented) {
+        nodes[v2].dOut++;
+        nodes[v1].dIn++;
+    }
+}
+
+uint Graph::addVertex() {
+    nodes.push_back(Graph::Node());
+
+    if(type == ADJACENCIES_MATRIX) {
+        for (uint i = 0; i < nodes.size() - 1; ++i)
+            matrix[i].push_back(DEFAULT_WEIGHT);
+
+        matrix.push_back(vector<float>(nodes.size(), DEFAULT_WEIGHT));
+
+    } else {
+        adjList.push_back({});
+    }
+
+    return (uint) nodes.size();
+}
+
+void Graph::fill() {
+    for (uint node = 0; node < nodes.size() ; node++) {
+        if(isIsolatedNode(node)){
+            for (uint i = 0; i < nodes.size(); ++i) {
+                if(node == i) continue;
+
+                applyEdge(node, i);
+                if(isOriented)
+                    applyEdge(i, node);
+            }
+
+        } else {
+            for (uint i = 0; i < nodes.size(); ++i) {
+                if(node == i) continue;
+
+                if(!areAdjacent(node, i))
+                    applyEdge(node, i);
+
+                if(isOriented && !areAdjacent(i, node))
+                    applyEdge(i, node);
+            }
+        }
+    }
+}
+
+void Graph::paintNode(uint v) {
+    nodes[v].painted = true;
+}
+
+bool Graph::paintedNode(uint v) {
+    return nodes[v].painted;
+}
+
+void Graph::unpaintNode(uint v) {
+    nodes[v].painted = false;    
+}
+
+void Graph::paintEdge(Edge* e) {
+    e->painted = true;
+}
+
+bool Graph::paintedEdge(Edge* e) {
+    return e->painted;
+}
+
+void Graph::unpaintEdge(Edge* e) {
+    e->painted = false;    
+}
+
+string Graph::getDOT(bool weighted) const {
+    char tag[60];
+
+    stringstream dot;
+    string rel_type = isOriented ? "->" : "--";
+
+    if(isOriented)  dot << "digraph";
+    else            dot << "graph";
+    
+    dot << "{";
+
+    dot << "node[shape=circle,width=0.5,height=0.5,fixedsize=true]";
+
+    for (auto edge = edges.begin(); edge != edges.end(); ++edge) {
+        auto from = edge->from;
+        auto to = edge->to;
+        auto weight = edge->weight;
+        auto paintedEdge = edge->painted;
+
+        if(weighted)
+            sprintf(tag, (paintedEdge ? "[color=red,penwidth=1.0,label=\"%.2f\"]" : "[label=\"%.2f\"]"), weight);
+        else
+            sprintf(tag, (paintedEdge ? "[color=red,penwidth=1.0]" : ""));
+
+        dot << to_string(from);
+        dot << rel_type;
+        dot << to_string(to);
+        dot << tag;
+        dot << ";";
+
+        if(nodes[from].painted) {
+            dot << to_string(from);
+            dot << "[style=filled,fillcolor=red]";
+        }
+
+        if(nodes[to].painted) {
+            dot << to_string(to);
+            dot << "[style=filled,fillcolor=red]";
+        }
+    }
+
+    for (uint i = 0; i < nodes.size(); i++) {
+        auto node = nodes[i];
+        if(node.isolated) {
+            dot << to_string(i);
+            dot << rel_type;
+            dot << to_string(i);
+            dot << "[style=invis];";
+
+            if(node.painted) {
+                dot << to_string(i);
+                dot << "[style=filled, fillcolor=red]";
+            }
+        }
+    }
+
+    dot << "}";
+
+    return dot.str();
+}
+
+void Graph::exportDOT(const char* file_name, bool force_override) const {
+    string extension(".dot");
+    string str_fname(file_name);
+    
+    // Formatting the final name of the file, with the extension appended 
+    // (if it is not already included on the file_name)
+    string fn(str_fname);
+    if(str_fname.length() < 5 || str_fname.substr(str_fname.length()-4,4) != extension) {
+        fn += extension;
+    }
+
+    //Checking if file exists and stop is force_override==false
+    ifstream ifile(fn);    
+    if(!force_override && ifile) {
+        cout << "[Error] File " + fn + " already exists.\n"
+             << "Use .exportDOT(..., force_override=true) to force writing."
+             << endl;
+        return;
+    }
+ 
+    //Proceeding to write into the file
+    try {
+        ofstream file;
+        file.open(fn);
+        file << getDOT();
+        file.close();
+    } catch (const std::exception &exc) {
+        cerr << exc.what();
+    }
 
 }
 
-void Graph::addVertex() {
-	if(type == ADJACENCIES_MATRIX) {
-		for (int i = 0; i < n; ++i)
-			matrix[i].push_back(DEFAULT_WEIGHT);
-
-		matrix.push_back(vector<float>(n+1, DEFAULT_WEIGHT));
-
-	} else {
-		adjList.push_back(list<pair<uint,float> >());
-	}
-
-	n++;
+const typename Graph::AdjacentsIterator Graph::adjacentsOf(uint v) const {
+    if(type == ADJACENCIES_MATRIX)
+        return AdjacentsIterator(matrix[v], nodes.size(), type);
+    else
+        return AdjacentsIterator(adjList[v], nodes.size(), type);
 }
-
-const typename Graph::Iterator Graph::adjacentsOf(uint v) const {
-	if(type == ADJACENCIES_MATRIX)
-		return Iterator(matrix[v-1], n, type);
-	else
-		return Iterator(adjList[v-1], n, type);
-}
-
-
 
 
 
@@ -123,55 +266,57 @@ const typename Graph::Iterator Graph::adjacentsOf(uint v) const {
  * Adjacents iterator implementation.
  */
 
-Graph::Iterator::Iterator(const vector<float>& conections, uint n, IMPL type) {
- 	_values = conections;
-	_it = _values.begin();
-	_current = -1;
+Graph::AdjacentsIterator::AdjacentsIterator(const vector<float>& relations, uint n, IMPL impl) {
+    _values = relations;
 
-	for (int current = 0; current < _vSpace; ++current)
-		if(_values[current] != DEFAULT_WEIGHT) {
-			_current = current;
-			break;
-		}
+    _it = _values.begin();
+    _current = -1;
 
-	_vSpace = n;
-	_type = type;
+    for (uint current = 0; current < _vSpace; ++current) {
+        if(_values[current] != DEFAULT_WEIGHT) {
+            _current = current;
+            break;
+        }
+    }
+
+    _vSpace = n;
+    _impl = impl;
 }
 
-Graph::Iterator::Iterator(const list<pair<uint,float> >& adjacents, uint n, IMPL type) {
- 	_adjacents = adjacents;
-	_iter = _adjacents.begin();
+Graph::AdjacentsIterator::AdjacentsIterator(const list<pair<uint,float> >& adjacents, uint n, IMPL impl) {
+    _adjacents = adjacents;
+    _iter = _adjacents.begin();
 
-	_vSpace = n;
-	_type = type;
+    _vSpace = n;
+    _impl = impl;
 }
 
-void Graph::Iterator::advance() {
-	if(_type == ADJACENCIES_MATRIX) {
-		_current++;
-		while(_current < _vSpace) {
-			if(_values[_current] != DEFAULT_WEIGHT)
-				break;
+void Graph::AdjacentsIterator::advance() {
+    if(_impl == ADJACENCIES_MATRIX) {
+        _current++;
+        while(_current < (long int)_vSpace) {
+            if(_values[_current] != DEFAULT_WEIGHT)
+                break;
 
-			_current++;
-		}
+            _current++;
+        }
 
-	} else
-		_iter++;
+    } else
+        _iter++;
 
-	return;
+    return;
 }
 
-pair<uint,float> Graph::Iterator::next() const {
-	if(_type == ADJACENCIES_MATRIX)
-		return make_pair(_current + 1, _values[_current]);
-	else
-		return (*_iter);
+pair<uint,float> Graph::AdjacentsIterator::next() const {
+    if(_impl == ADJACENCIES_MATRIX)
+        return make_pair(_current, _values[_current]);
+    else
+        return (*_iter);
 }
 
-bool Graph::Iterator::thereIsMore() const {
-	if(_type == ADJACENCIES_MATRIX)
-		return -1 < _current && _current < _vSpace;
-	else
-		return _iter != _adjacents.end();
+bool Graph::AdjacentsIterator::thereIsMore() const {
+    if(_impl == ADJACENCIES_MATRIX)
+        return -1 < _current && _current < ((long int)_vSpace);
+    else
+        return _iter != _adjacents.end();
 }

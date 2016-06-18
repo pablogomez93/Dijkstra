@@ -5,4 +5,4 @@ run:
 	./dijkstra
 
 clear:
-	@rm dijkstra
+	@rm -f dijkstra
